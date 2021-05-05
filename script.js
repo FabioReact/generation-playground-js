@@ -97,11 +97,26 @@ const createCard = data => {
 	const mainContent = document.createElement('div')
 	mainContent.className = 'px-6 py-4'
 
+	// Pokemon Name
 	const h3 = document.createElement('h3')
-	h3.setAttribute('class', 'font-bold text-xl mb-2')
+	h3.setAttribute('class', 'font-bold text-xl mb-2 capitalize text-center')
 	const title = document.createTextNode(data.name)
 	h3.appendChild(title)
 	mainContent.appendChild(h3)
+
+	// Description
+	const weightP = document.createElement('p')
+	const heightP = document.createElement('p')
+	weightP.className = "text-sm my-2"
+	heightP.className = "text-sm my-2"
+	const weightText = document.createTextNode(`Weight: ${data.weight / 10}kg`)
+	const heightText = document.createTextNode(`Height: ${data.height * 10}cm`)
+	weightP.append(weightText)
+	heightP.append(heightText)
+	mainContent.appendChild(weightP)
+	mainContent.appendChild(heightP)
+
+
 
 	const footer = document.createElement('footer')
 	footer.className = 'px-6 py-4'
@@ -127,7 +142,7 @@ const createStats = stats => {
 	// Creation de la section
 	const section = document.createElement('section')
 	section.id = "poke-stats"
-	section.className = 'bg-gray-300 p-4 rounded self-start'
+	section.className = 'bg-gray-300 p-4 rounded self-start w-80'
 
 	// Création du titre 'Stats'
 	const h4 = document.createElement('h4')
@@ -136,7 +151,7 @@ const createStats = stats => {
 
 	// Création du conteneur des différentes barres de stats
 	const barsContainer = document.createElement('div')
-	barsContainer.className = 'flex gap-1'
+	barsContainer.className = 'flex justify-between'
 
 	// Création de chaque barre statistique
 	stats.forEach(element => {
@@ -161,7 +176,7 @@ const createStats = stats => {
 
 		// Creation du nom de la stat
 		const spanStat = document.createElement('span')
-		spanStat.className = 'text-xs self-start w-10 text-center'
+		spanStat.className = 'text-xs self-start w-10 text-center block'
 		const spanText = document.createTextNode(element.stat.name)
 		spanStat.append(spanText)
 		singleStat.append(spanStat)
