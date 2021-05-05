@@ -8,10 +8,9 @@
 // querySelectorAll nous retourne tout les elements qui matchent au sélecteur donné
 // document.querySelectorAll("button")
 
-const form = document.getElementsByTagName('form')[0]
+const forms = document.getElementsByTagName('form')
 const body = document.querySelector('body')
 const main = document.querySelector('main')
-const input = document.getElementById('search')
 
 const typeColors = {
 	normal: '#A8A878',
@@ -33,48 +32,55 @@ const typeColors = {
 	steel: '#B8B8D0',
 }
 
-form.addEventListener('submit', async event => {
-	// Empeche le comportement par défaut de l'evenement - à savoir (ici) le rafraichissement de la page lors de la soumission du formulaire
-	try {
-		event.preventDefault()
-		removeCard()
-		// Ici, supprimer le message d'erreur précédent
-		const errorElement = document.getElementById("error")
-		errorElement?.remove()
-		const searchedPokemon = input.value.toLowerCase()
-		const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${searchedPokemon}`)
-		console.log(reponse)
-		if (reponse.status === 404) {
-			throw new Error("Désolé cher dresseur, ce pokémon n'existe pas à notre connaissance...")
-		} else {
-			const data = await reponse.json()
-			createCard(data)
-			createStats(data.stats)
+for (const form of forms) {
+	form.addEventListener('submit', async event => {
+		// Empeche le comportement par défaut de l'evenement - à savoir (ici) le rafraichissement de la page lors de la soumission du formulaire
+		try {
+			event.preventDefault()
+			removeCard()
+			// Ici, supprimer le message d'erreur précédent
+			const errorElement = document.getElementById("error")
+			errorElement?.remove()
+			const input = document.getElementById(`search-${form.dataset.form}`)
+			const searchedPokemon = input.value.toLowerCase()
+			const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${searchedPokemon}`)
+			console.log(reponse)
+			if (reponse.status === 404) {
+				throw new Error("Désolé cher dresseur, ce pokémon n'existe pas à notre connaissance...")
+			} else {
+				const data = await reponse.json()
+				const card = createCard(data)
+				const stats = createStats(data.stats)
+				const section = document.querySelector(`[data-section="${form.dataset.form}"]`)
+				section.append(card)
+				section.append(stats)
+			}
+		} catch (error) {
+			const pError = document.createElement('p')
+			pError.id = "error"
+			pError.className = "bg-red-500 text-white self-center px-4 rounded"
+			const errorText = document.createTextNode(error.message)
+			pError.appendChild(errorText)
+			main.appendChild(pError)
 		}
-	} catch (error) {
-		const pError = document.createElement('p')
-		pError.id = "error"
-		pError.className = "bg-red-500 text-white self-center px-4 rounded"
-		const errorText = document.createTextNode(error.message)
-		pError.appendChild(errorText)
-		main.appendChild(pError)
-	}
-	// #region Chain
-	// const evolutionChainReponse = await fetch(data.species.url)
-	// const evolutionChainData = await evolutionChainReponse.json()
-	// const evolutionReponse = await fetch(evolutionChainData.evolution_chain.url)
-	// const evolutionData = await evolutionReponse.json()
-	// let next = evolutionData.chain
-	// while (next !== null) {
-	// 	console.log(next.species.name)
-	// 	if (next.evolves_to.length > 0) {
-	// 		next = next.evolves_to[0]
-	// 	} else {
-	// 		next = null
-	// 	}
-	// }
-	// #endregion
-})
+		// #region Chain
+		// const evolutionChainReponse = await fetch(data.species.url)
+		// const evolutionChainData = await evolutionChainReponse.json()
+		// const evolutionReponse = await fetch(evolutionChainData.evolution_chain.url)
+		// const evolutionData = await evolutionReponse.json()
+		// let next = evolutionData.chain
+		// while (next !== null) {
+		// 	console.log(next.species.name)
+		// 	if (next.evolves_to.length > 0) {
+		// 		next = next.evolves_to[0]
+		// 	} else {
+		// 		next = null
+		// 	}
+		// }
+		// #endregion
+	})
+}
+
 
 const removeCard = () => {
 	const pokemonCard = document.getElementById('pokemon-card')
@@ -135,7 +141,7 @@ const createCard = data => {
 	article.appendChild(img)
 	article.appendChild(mainContent)
 	article.appendChild(footer)
-	main.appendChild(article)
+	return article
 }
 
 const createStats = stats => {
@@ -186,6 +192,5 @@ const createStats = stats => {
 	section.append(h4)
 	section.append(barsContainer)
 
-	// Ajout de la section au body
-	main.append(section)
+	return section
 }

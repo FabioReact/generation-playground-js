@@ -9,12 +9,21 @@
 	<title>Pokedex</title>
 </head>
 <body>
-	<main class="flex flex-col">
-		<form>
-			<label for="search">Rechercher:</label>
-			<input type="text" id="search" name="search">
-			<button>Fetch Pokemon</button>
-		</form>
+	<main class="flex">
+		<section class="flex flex-col" data-section="first">
+			<form data-form="first">
+				<label for="search">Rechercher:</label>
+				<input type="text" id="search-first" name="search">
+				<button>Fetch Pokemon</button>
+			</form>
+		</section>
+		<section class="flex flex-col" data-section="second">
+			<form data-form="second">
+				<label for="search">Rechercher:</label>
+				<input type="text" id="search-second" name="search">
+				<button>Fetch Pokemon</button>
+			</form>
+		</section>
 	</main>
 </body>
 </html>
