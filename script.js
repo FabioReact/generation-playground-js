@@ -9,48 +9,85 @@
 // document.querySelectorAll("button")
 
 const form = document.getElementsByTagName('form')[0]
-const body = document.querySelector("body")
-const input = document.getElementById("search")
+const body = document.querySelector('body')
+const main = document.querySelector('main')
+const input = document.getElementById('search')
 
 const typeColors = {
-	normal: "#A8A878",
-	fire: "#F08030",
-	water: "#6890F0",
-	grass: "#78C850",
-	electric: "#F8D030",
-	ice: "#98D8D8",
-	fight: "#C03028",
-	poison: "#A040A0",
-	ground: "#E0C068",
-	flying: "#A890F0",
-	psychic: "#F85888",
-	bug: "#A8B820",
-	rock: "#B8A038",
-	ghost: "#705898",
-	dragon: "#7038F8",
-	dark: "#705848",
-	steel: "#B8B8D0",
+	normal: '#A8A878',
+	fire: '#F08030',
+	water: '#6890F0',
+	grass: '#78C850',
+	electric: '#F8D030',
+	ice: '#98D8D8',
+	fight: '#C03028',
+	poison: '#A040A0',
+	ground: '#E0C068',
+	flying: '#A890F0',
+	psychic: '#F85888',
+	bug: '#A8B820',
+	rock: '#B8A038',
+	ghost: '#705898',
+	dragon: '#7038F8',
+	dark: '#705848',
+	steel: '#B8B8D0',
 }
 
-form.addEventListener('submit', async (event) => {
+form.addEventListener('submit', async event => {
 	// Empeche le comportement par défaut de l'evenement - à savoir (ici) le rafraichissement de la page lors de la soumission du formulaire
-	event.preventDefault()
-	const searchedPokemon = input.value.toLowerCase()
-	const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${searchedPokemon}`)
-	const data = await reponse.json()
-	console.log(data)
-	createCard(data)
-	createStats(data.stats)
+	try {
+		event.preventDefault()
+		removeCard()
+		// Ici, supprimer le message d'erreur précédent
+		const errorElement = document.getElementById("error")
+		errorElement?.remove()
+		const searchedPokemon = input.value.toLowerCase()
+		const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${searchedPokemon}`)
+		console.log(reponse)
+		if (reponse.status === 404) {
+			throw new Error("Désolé cher dresseur, ce pokémon n'existe pas à notre connaissance...")
+		} else {
+			const data = await reponse.json()
+			createCard(data)
+			createStats(data.stats)
+		}
+	} catch (error) {
+		const pError = document.createElement('p')
+		pError.id = "error"
+		pError.className = "bg-red-500 text-white self-center px-4 rounded"
+		const errorText = document.createTextNode(error.message)
+		pError.appendChild(errorText)
+		main.appendChild(pError)
+	}
+	// #region Chain
+	// const evolutionChainReponse = await fetch(data.species.url)
+	// const evolutionChainData = await evolutionChainReponse.json()
+	// const evolutionReponse = await fetch(evolutionChainData.evolution_chain.url)
+	// const evolutionData = await evolutionReponse.json()
+	// let next = evolutionData.chain
+	// while (next !== null) {
+	// 	console.log(next.species.name)
+	// 	if (next.evolves_to.length > 0) {
+	// 		next = next.evolves_to[0]
+	// 	} else {
+	// 		next = null
+	// 	}
+	// }
+	// #endregion
 })
 
-const createCard = (data) => {
-	const pokemonCard = document.getElementById("pokemon-card")
+const removeCard = () => {
+	const pokemonCard = document.getElementById('pokemon-card')
 	if (pokemonCard !== null) {
 		pokemonCard.remove()
 	}
+	document.getElementById("poke-stats")?.remove()
+}
+
+const createCard = data => {
 	const article = document.createElement('article')
-	article.id = "pokemon-card"
-	article.className = "max-w-xs rounded overflow-hidden shadow-lg my-2"
+	article.id = 'pokemon-card'
+	article.className = 'max-w-xs rounded overflow-hidden shadow-lg my-2'
 
 	const img = document.createElement('img')
 	img.classList.add('w-full')
@@ -72,7 +109,8 @@ const createCard = (data) => {
 	// Bloc responsable pour la création des types
 	for (const element of data.types) {
 		const span = document.createElement('span')
-		span.className = 'inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-darker mr-2'
+		span.className =
+			'inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-darker mr-2'
 		span.style.backgroundColor = typeColors[element.type.name]
 		const textFooter = document.createTextNode(element.type.name)
 		span.appendChild(textFooter)
@@ -82,13 +120,14 @@ const createCard = (data) => {
 	article.appendChild(img)
 	article.appendChild(mainContent)
 	article.appendChild(footer)
-	body.appendChild(article)
+	main.appendChild(article)
 }
 
-const createStats = (stats) => {
+const createStats = stats => {
 	// Creation de la section
 	const section = document.createElement('section')
-	section.className = "bg-gray-300 p-4 rounded inline-block"
+	section.id = "poke-stats"
+	section.className = 'bg-gray-300 p-4 rounded self-start'
 
 	// Création du titre 'Stats'
 	const h4 = document.createElement('h4')
@@ -117,12 +156,12 @@ const createStats = (stats) => {
 			blueBar.className = 'echelon w-10 h-1 mb-1 bg-blue-500'
 			singleStat.append(blueBar)
 			blueBars--
-		} 
+		}
 		barsContainer.append(singleStat)
 
 		// Creation du nom de la stat
 		const spanStat = document.createElement('span')
-		spanStat.className = 'text-xs inline-block w-10 text-center'
+		spanStat.className = 'text-xs self-start w-10 text-center'
 		const spanText = document.createTextNode(element.stat.name)
 		spanStat.append(spanText)
 		singleStat.append(spanStat)
@@ -133,30 +172,5 @@ const createStats = (stats) => {
 	section.append(barsContainer)
 
 	// Ajout de la section au body
-	body.append(section)
+	main.append(section)
 }
-
-
-// <section class="bg-gray-300 p-4 rounded inline-block">
-// 	<h4>Stats</h4>
-// 	<div class="flex gap-1">
-// 		<div class="single-stat">
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-white"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-blue-500"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-blue-500"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-blue-500"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-blue-500"></div>
-// 			<div class="echelon w-10 h-1 mb-1 bg-blue-500"></div>
-// 			<span class="text-xs inline-block w-10 text-center">HP</span>
-// 		</div>
-// 	</div>
-// </section>
