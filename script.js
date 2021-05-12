@@ -34,28 +34,39 @@ const typeColors = {
 
 for (const form of forms) {
 	form.addEventListener('submit', async event => {
-		// Empeche le comportement par défaut de l'evenement - à savoir (ici) le rafraichissement de la page lors de la soumission du formulaire
 		try {
+			// Empeche le comportement par défaut de l'evenement - à savoir (ici) le rafraichissement de la page lors de la soumission du formulaire
 			event.preventDefault()
-			removeCard()
+
+			// Je supprime l'ancienne pokemon-card (s'il y en a une)
+			removeCard(form.dataset.form)
+
 			// Ici, supprimer le message d'erreur précédent
 			const errorElement = document.getElementById("error")
 			errorElement?.remove()
+
+			// Je sélectionne l'input saisi par l'utilisateur
 			const input = document.getElementById(`search-${form.dataset.form}`)
 			const searchedPokemon = input.value.toLowerCase()
+
+			// Appel à l'API
 			const reponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${searchedPokemon}`)
-			console.log(reponse)
 			if (reponse.status === 404) {
+				// Si j'ai un status 404, alors le pokemon saisi n'existe pas
 				throw new Error("Désolé cher dresseur, ce pokémon n'existe pas à notre connaissance...")
 			} else {
+				// Sinon, le pokemon existe...
 				const data = await reponse.json()
 				const card = createCard(data)
+				// ...et je créer une vignette pokemon et une vignette stats...
 				const stats = createStats(data.stats)
 				const section = document.querySelector(`[data-section="${form.dataset.form}"]`)
+				// ...enfin, j'insère ces vignettes dans la bonne section
 				section.append(card)
 				section.append(stats)
 			}
 		} catch (error) {
+			// En cas d'erreur, j'affiche mon erreur sur la page
 			const pError = document.createElement('p')
 			pError.id = "error"
 			pError.className = "bg-red-500 text-white self-center px-4 rounded"
@@ -64,6 +75,7 @@ for (const form of forms) {
 			main.appendChild(pError)
 		}
 		// #region Chain
+		// Traitement pour afficher les évolutions
 		// const evolutionChainReponse = await fetch(data.species.url)
 		// const evolutionChainData = await evolutionChainReponse.json()
 		// const evolutionReponse = await fetch(evolutionChainData.evolution_chain.url)
@@ -81,19 +93,18 @@ for (const form of forms) {
 	})
 }
 
-
-const removeCard = () => {
-	const pokemonCard = document.getElementById('pokemon-card')
-	if (pokemonCard !== null) {
-		pokemonCard.remove()
-	}
-	document.getElementById("poke-stats")?.remove()
+const removeCard = position => {
+	// const pokemonCard = document.querySelector(`[data-section="${position}"] .pokemon-card`)
+	// if (pokemonCard !== null) {
+	// 	pokemonCard.remove()
+	// }
+	document.querySelector(`[data-section="${position}"] .pokemon-card`)?.remove()
+	document.querySelector(`[data-section=${position}] .poke-stats`)?.remove()
 }
 
 const createCard = data => {
 	const article = document.createElement('article')
-	article.id = 'pokemon-card'
-	article.className = 'max-w-xs rounded overflow-hidden shadow-lg my-2'
+	article.className = 'pokemon-card max-w-xs rounded overflow-hidden shadow-lg my-2'
 
 	const img = document.createElement('img')
 	img.classList.add('w-full')
@@ -147,8 +158,7 @@ const createCard = data => {
 const createStats = stats => {
 	// Creation de la section
 	const section = document.createElement('section')
-	section.id = "poke-stats"
-	section.className = 'bg-gray-300 p-4 rounded self-start w-80'
+	section.className = 'poke-stats bg-gray-300 p-4 rounded self-start w-80'
 
 	// Création du titre 'Stats'
 	const h4 = document.createElement('h4')
